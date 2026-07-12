@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mariaesterrodrigues.com.br/sitemap.xml

@@ -1,0 +1,67 @@
+# =============================================================
+# GP.PSIE, configuracao Netlify
+# Headers de seguranca conforme OWASP Secure Headers Project
+# Arquitetura: multipagina estatica + Web Components (Light DOM)
+# =============================================================
+
+[build]
+  publish = "."
+
+# ---------- Headers globais ----------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Impede embed do site em iframes externos (clickjacking)
+    X-Frame-Options = "DENY"
+
+    # Impede sniffing de MIME type
+    X-Content-Type-Options = "nosniff"
+
+    # Controla envio do referer para outros dominios
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Bloqueia acesso a APIs sensiveis do navegador
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), autoplay=()"
+
+    # Forca HTTPS por 1 ano (HSTS)
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+    # Content Security Policy restritiva.
+    # script-src 'self': components.js e main.js sao arquivos proprios,
+    #   sem handlers inline (onclick etc), portanto nao precisam de 'unsafe-inline'.
+    # style-src 'unsafe-inline': o CSS usa font-variation-settings e SVGs inline;
+    #   alem disso o Google Fonts injeta estilo. Sem risco relevante de XSS aqui.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+
+    # Cross-Origin isolation
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+
+# ---------- Cache de assets estaticos (hash via ?v= no HTML) ----------
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ---------- HTML sempre revalidado (evita cache stale de conteudo) ----------
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ---------- Sitemap ----------
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
